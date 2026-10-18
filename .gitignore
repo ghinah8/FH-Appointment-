@@ -1,0 +1,10 @@
+.dart_tool/
+build/
+.flutter-plugins*
+.packages
+pubspec.lock
+.env
+*.iml
+.idea/
+supabase/.temp/
+/lib/env.json

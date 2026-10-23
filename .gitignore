@@ -7,4 +7,3 @@ pubspec.lock
 *.iml
 .idea/
 supabase/.temp/
-/lib/env.json

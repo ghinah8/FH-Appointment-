@@ -1,99 +1,70 @@
-# FH Fatima Habib — Architecture Tutoring Booking System
+# موقع حجز دروس الآنسة فاطمة
 
-A responsive Arabic web application designed to simplify appointment booking and management for architecture tutoring sessions. The platform aims to provide students with an organized booking experience while allowing the tutor to manage appointments, availability, and student requests through an administrative dashboard.
+Flutter Web + Supabase (PostgreSQL + Auth + RLS) · BLoC/Cubit · Clean Architecture (feature-first)
 
-## 🎯 Project Overview
+## ما الموجود حالياً
 
-**FH Fatima Habib** is being developed as a web-based appointment management system for architecture students. It is designed to streamline the scheduling process, reduce booking conflicts, and provide clear communication between students and the tutor.
+| الجزء | الحالة |
+|---|---|
+| قاعدة البيانات (جداول، RLS، دوال الحجز، انتهاء الطلبات، التذكيرات) | جاهز ومُختبر على PostgreSQL 16 |
+| هيكل Flutter (theme، router، DI، errors) | مكتوب، لم يُجمَّع بعد |
+| ميزة `auth` (دخول، تسجيل، تحقق البريد) | مكتوبة، لم تُجمَّع بعد |
+| الحجز، مواعيدي، لوحة الإدارة، الإشعارات | الخطوات التالية |
 
-The application supports Arabic and a right-to-left (RTL) interface, with a focus on usability, maintainability, and a consistent visual identity.
+## 1) قاعدة البيانات
 
-## ✨ Planned Features
+1. أنشئ مشروعاً في [Supabase](https://supabase.com).
+2. نفّذ الملفات بالترتيب من `supabase/migrations/` في SQL Editor (أو `supabase db push`).
+3. **Authentication → Providers → Email**: فعّل *Confirm email* (التحقق إلزامي).
+4. **Authentication → URL Configuration**: ضع رابط الموقع في *Site URL*.
+5. أنشئ حساب الآنسة فاطمة من صفحة التسجيل، ثم اجعله مديراً:
 
-### Student Features
-- Create an account and verify an email address.
-- Sign in and securely manage authentication.
-- Register personal and academic information, including university and study year.
-- Browse available appointment dates and time slots.
-- Request tutoring appointments based on the tutor's availability.
-- View appointment statuses and booking history.
-- Request appointment cancellation or rescheduling.
-- Receive appointment reminders and relevant notifications.
+```sql
+update public.profiles set role = 'admin' where id = (
+  select id from auth.users where email = 'EMAIL_HERE'
+);
+```
 
-### Admin Features
-- Access an administrative dashboard.
-- Review, approve, or reject booking requests.
-- Manage confirmed appointments.
-- Configure working hours and available time slots.
-- Manage holidays, schedule exceptions, and exceptional appointments.
-- Review student information and booking history.
-- Handle cancellation and rescheduling requests.
-- Prepare WhatsApp messages for appointment-related communication.
+6. عدّل رابط الخريطة:
 
-## 🛠️ Tech Stack
+```sql
+update public.app_settings set location_maps_url = 'https://maps.app.goo.gl/...' where id = 1;
+```
 
-- **Frontend:** Flutter Web
-- **Programming Language:** Dart
-- **State Management:** BLoC / Cubit
-- **Backend Services:** Supabase
-- **Database:** PostgreSQL (via Supabase)
-- **Authentication:** Supabase Auth
-- **Database Security:** Row Level Security (RLS)
-- **Navigation:** GoRouter
-- **Architecture:** Clean Architecture, Feature-First Structure, and Repository Pattern
+### قواعد مهمة في الداتا بيس
+- الطالب لا يكتب في `appointments` مباشرة؛ كل شيء عبر دوال RPC:
+  `create_appointment`، `request_appointment_change`، و`admin_*`.
+- رموز الأخطاء (تقرأها الواجهة): `slot_unavailable`، `email_not_verified`،
+  `change_window_closed`، `invalid_state`، `forbidden`، `not_found`.
+- المواعيد المتاحة: `select * from get_available_slots()` (7 أيام بتوقيت سوريا).
+- انتهاء الطلبات المعلّقة: `expire_stale_pending()` كل دقيقة عبر `pg_cron`
+  (فعّل الإضافة من Database → Extensions، ثم أعد تشغيل آخر ملف migration).
 
-## 🏗️ Architecture
+## 2) تشغيل Flutter
 
-The project follows a layered architecture to separate business logic, data access, and presentation.
+لم يُنشأ مجلد `web/` ولا ملفات المنصات، ولّدها مرة واحدة:
 
-- **Presentation:** Flutter UI, Cubits, and application states.
-- **Domain:** Entities, repository contracts, and use cases.
-- **Data:** Remote data sources, models, and repository implementations.
-- **Core:** Shared configuration, dependency injection, routing, themes, utilities, and error handling.
+```bash
+flutter create . --platforms web --project-name fatima_habib
+flutter pub get
+flutter run -d chrome \
+  --dart-define=SUPABASE_URL=https://YOUR-PROJECT.supabase.co \
+  --dart-define=SUPABASE_ANON_KEY=YOUR_ANON_KEY \
+  --dart-define=SITE_URL=http://localhost:5000
+```
 
-This structure is intended to improve maintainability, testability, and scalability as new features are introduced.
+> `flutter create .` لا يستبدل ملفات `lib/` الموجودة؛ إن أنشأ `test/widget_test.dart` قديماً احذفه.
 
-## 🔐 Authentication & Security
+## هيكل الكود
 
-The authentication module includes:
-
-- Email and password registration.
-- Email verification.
-- Login and logout.
-- Password reset requests.
-- University selection during registration.
-- Role-based application navigation.
-
-Database access is designed to be protected through Supabase Row Level Security policies and appropriate authorization checks.
-
-## 🌐 Localization & UI
-
-- Arabic interface with RTL layout.
-- Responsive design for different screen sizes.
-- A consistent visual identity inspired by the FH Fatima Habib brand.
-- Reusable UI components and shared theme configuration.
-
-## 🚧 Development Status
-
-**Status: In Development**
-
-The authentication module and initial Supabase integration have been implemented. The remaining features are being developed incrementally, starting with authentication and access control before moving on to appointment booking, schedule management, and the administrative dashboard.
-
-## 🎯 Project Goals
-
-- Build a practical, maintainable booking system.
-- Apply Clean Architecture and BLoC/Cubit in a real-world Flutter Web project.
-- Integrate Flutter with Supabase authentication and PostgreSQL.
-- Prevent conflicting bookings through reliable server-side validation.
-- Provide a clear and accessible Arabic user experience.
-
-## 👩‍💻 Developer
-
-**Ghina Habib**  
-Flutter Developer
-
-GitHub: [@ghinah8](https://github.com/ghinah8)
-
----
-
-*This project is being developed as a dedicated appointment booking and management platform for architecture tutoring sessions.*
+```
+lib/
+├── core/        config, di, error, router, theme, usecase, utils, widgets
+├── features/
+│   ├── auth/        data / domain / presentation
+│   ├── booking/     (الصفحة الرئيسية مؤقتة حالياً)
+│   ├── appointments/  (لاحقاً)
+│   ├── profile/       (لاحقاً)
+│   └── admin/         (لاحقاً)
+└── main.dart
+```

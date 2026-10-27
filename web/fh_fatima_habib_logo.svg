@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="512" height="512">
+        
+        <!-- Background Layer -->
+        <rect width="500" height="500" rx="125" fill="#0F2A1D"/>
+
+        <g id="monogram-FH" stroke="#E3EED4" stroke-linecap="square" stroke-linejoin="miter" fill="none">
+          <!-- Main Left Stem of F -->
+          <line x1="160" y1="120" x2="160" y2="355" stroke-width="22" />
+
+          <!-- Top horizontal arm of F -->
+          <line x1="153" y1="120" x2="255" y2="120" stroke-width="22" />
+
+          <!-- Middle Arched Crossbar (Curves smoothly from F stem down to H crossline) -->
+          <path d="M 160 260 C 160 215, 235 210, 290 320" stroke-width="12.100000000000001" />
+
+          <!-- Center vertical support column inside the arch -->
+          <line x1="230" y1="225" x2="230" y2="395" stroke-width="22" />
+
+          <!-- Right Stem of H -->
+          <line x1="340" y1="210" x2="340" y2="395" stroke-width="22" />
+
+          <!-- Horizontal Bridge of H connecting center to right -->
+          <line x1="230" y1="320" x2="346" y2="320" stroke-width="22" />
+        </g>
+
+        
+      
+      </svg>

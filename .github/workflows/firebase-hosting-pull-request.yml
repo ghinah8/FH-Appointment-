@@ -23,7 +23,7 @@ jobs:
 
       - run: flutter pub get
 
-      - run: flutter build web --release --dart-define-from-file=env.json
+      - run: flutter build web --release --dart-define-from-file=env.production.json
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:

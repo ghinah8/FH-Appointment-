@@ -13,7 +13,9 @@ class AppointmentsAdminInitial extends AppointmentsAdminState {
 }
 
 class AppointmentsAdminLoading extends AppointmentsAdminState {
-  const AppointmentsAdminLoading();
+  const AppointmentsAdminLoading([this.appointments = const []]);
+
+  final List<AdminAppointment> appointments;
 }
 
 class AppointmentsAdminLoaded extends AppointmentsAdminState {
@@ -23,9 +25,10 @@ class AppointmentsAdminLoaded extends AppointmentsAdminState {
 }
 
 class AppointmentsAdminError extends AppointmentsAdminState {
-  const AppointmentsAdminError(this.message);
+  const AppointmentsAdminError(this.message, [this.appointments = const []]);
 
   final String message;
+  final List<AdminAppointment> appointments;
 }
 
 class AppointmentsAdminActionLoading extends AppointmentsAdminState {
@@ -47,11 +50,20 @@ class AppointmentsAdminCubit extends Cubit<AppointmentsAdminState> {
   final DecideAppointment _decideAppointment;
 
   Future<void> loadPendingAppointments() async {
-    emit(const AppointmentsAdminLoading());
+    final previousAppointments = switch (state) {
+      AppointmentsAdminLoaded(:final appointments) => appointments,
+      AppointmentsAdminLoading(:final appointments) => appointments,
+      AppointmentsAdminActionLoading(:final appointments) => appointments,
+      AppointmentsAdminError(:final appointments) => appointments,
+      _ => <AdminAppointment>[],
+    };
+    emit(AppointmentsAdminLoading(previousAppointments));
 
     final result = await _getPendingAppointments(const NoParams());
     result.fold(
-      (failure) => emit(AppointmentsAdminError(failure.message)),
+      (failure) => emit(
+        AppointmentsAdminError(failure.message, previousAppointments),
+      ),
       (appointments) => emit(AppointmentsAdminLoaded(appointments)),
     );
   }
@@ -80,7 +92,7 @@ class AppointmentsAdminCubit extends Cubit<AppointmentsAdminState> {
 
     return result.fold(
       (failure) {
-        emit(AppointmentsAdminError(failure.message));
+        emit(AppointmentsAdminError(failure.message, appointments));
         return false;
       },
       (_) {

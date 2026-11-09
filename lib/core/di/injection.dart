@@ -11,12 +11,18 @@ import '../../features/auth/presentation/cubit/register_cubit.dart';
 import '../../features/auth/presentation/cubit/verify_email_cubit.dart';
 
 import '../../features/booking/data/datasources/booking_remote_data_source.dart';
+import '../../features/booking/data/datasources/admin_dashboard_remote_data_source.dart';
 import '../../features/booking/data/repositories/booking_repository_impl.dart';
+import '../../features/booking/data/repositories/admin_dashboard_repository_impl.dart';
 import '../../features/booking/domain/repositories/booking_repository.dart';
+import '../../features/booking/domain/repositories/admin_dashboard_repository.dart';
 import '../../features/booking/domain/usecases/booking_usecases.dart';
+import '../../features/booking/domain/usecases/admin_dashboard_usecases.dart';
 import '../../features/booking/presentation/cubit/appointments_admin_cubit.dart';
 import '../../features/booking/presentation/cubit/booking_cubit.dart';
 import '../../features/booking/presentation/cubit/appointments_cubit.dart';
+import '../../features/booking/presentation/cubit/admin_dashboard_cubit.dart';
+import '../../features/booking/presentation/cubit/public_app_settings_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -88,5 +94,12 @@ Future<void> initDependencies() async {
         getPendingAppointments: sl(),
         decideAppointment: sl(),
       ),
-    );
+    )
+    ..registerLazySingleton(() => AdminDashboardRemoteDataSource(sl()))
+    ..registerLazySingleton<AdminDashboardRepository>(
+      () => AdminDashboardRepositoryImpl(sl()),
+    )
+    ..registerLazySingleton(() => AdminDashboardUseCases(sl()))
+    ..registerFactory(() => AdminDashboardCubit(sl()))
+    ..registerFactory(() => PublicAppSettingsCubit(sl()));
 }
